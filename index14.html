@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>英文拼字遊戲</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 20px;
+      margin: 0;
+    }
+
+    h1 {
+      font-size: 2em;
+    }
+
+    #shuffled {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin: 10px 0;
+    }
+
+    .letter-btn {
+      font-size: 24px;
+      margin: 5px;
+      padding: 10px 15px;
+      cursor: pointer;
+      min-width: 50px;
+      border-radius: 10px;
+    }
+
+    #answer {
+      font-size: 32px;
+      margin: 20px 0;
+      min-height: 40px;
+    }
+
+    #result {
+      font-size: 24px;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+
+    #meaning {
+      font-size: 20px;
+      margin-bottom: 10px;
+      color: #555;
+    }
+
+    button {
+      margin: 5px;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 8px;
+    }
+
+    @media (max-width: 600px) {
+      .letter-btn {
+        font-size: 20px;
+        padding: 8px 12px;
+        min-width: 40px;
+      }
+
+      #answer {
+        font-size: 24px;
+      }
+
+      #result {
+        font-size: 20px;
+      }
+
+      #meaning {
+        font-size: 18px;
+      }
+
+      button {
+        font-size: 14px;
+        padding: 8px 14px;
+      }
+
+      h1 {
+        font-size: 1.5em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>英文拼字遊戲</h1>
+  <div id="meaning"></div>
+  <div id="shuffled"></div>
+  <div id="answer"></div>
+  <div>
+    <button onclick="resetGame()">重玩</button>
+    <button onclick="nextWord()">下一題</button>
+
+    <!-- 新增這段按鈕 -->
+<button onclick="unlockSound()" id="startSoundBtn">🔊 點我啟用音效</button>
+
+  </div>
+  <div id="result"></div>
+
+  <!-- 音效 -->
+  <audio id="clickSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_5b24e6cbfb.mp3?filename=button-16.mp3"></audio>
+  <audio id="correctSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_64b4179b8a.mp3?filename=success-1-6297.mp3"></audio>
+  <audio id="wrongSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c75c7931e6.mp3?filename=error-126627.mp3"></audio>
+
+  <script>
+function unlockSound() {
+  clickSound.play().catch(() => {});
+  correctSound.play().catch(() => {});
+  wrongSound.play().catch(() => {});
+
+  // 使用者互動後允許播放音效，並隱藏按鈕
+  document.getElementById("startSoundBtn").style.display = "none";
+}
+
+
+    const wordList = [
+      { word: "APPLE", meaning: "蘋果" },
+      { word: "HOUSE", meaning: "房子" },
+      { word: "TRAIN", meaning: "火車" },
+      { word: "MOUSE", meaning: "老鼠" },
+      { word: "PLANE", meaning: "飛機" },
+    ];
+
+    let currentWord = "";
+    let currentMeaning = "";
+    let selected = "";
+
+    const clickSound = document.getElementById("clickSound");
+    const correctSound = document.getElementById("correctSound");
+    const wrongSound = document.getElementById("wrongSound");
+
+    function shuffle(array) {
+      return array.sort(() => Math.random() - 0.5);
+    }
+
+    function displayShuffled() {
+      const shuffled = shuffle(currentWord.split(''));
+      const container = document.getElementById("shuffled");
+      container.innerHTML = "";
+
+      shuffled.forEach(letter => {
+        const btn = document.createElement("button");
+        btn.textContent = letter;
+        btn.className = "letter-btn";
+        btn.onclick = () => {
+          clickSound.currentTime = 0;
+          clickSound.play();
+          selected += letter;
+          document.getElementById("answer").textContent = selected;
+          btn.disabled = true;
+
+          if (selected.length === currentWord.length) {
+            checkAnswer();
+          }
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    function checkAnswer() {
+      const result = document.getElementById("result");
+      if (selected === currentWord) {
+        result.textContent = "✅ 正確！";
+        result.style.color = "green";
+        correctSound.play();
+      } else {
+        result.textContent = "❌ 錯誤，請再試一次！";
+        result.style.color = "red";
+        wrongSound.play();
+      }
+    }
+
+    function resetGame() {
+      selected = "";
+      document.getElementById("answer").textContent = "";
+      document.getElementById("result").textContent = "";
+      displayShuffled();
+    }
+
+    function nextWord() {
+      const randomIndex = Math.floor(Math.random() * wordList.length);
+      currentWord = wordList[randomIndex].word;
+      currentMeaning = wordList[randomIndex].meaning;
+      document.getElementById("meaning").textContent = `中文意思：${currentMeaning}`;
+      resetGame();
+    }
+
+    // 初始化
+    nextWord();
+  </script>
+</body>
+</html>

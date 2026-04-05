@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>成語選字學習遊戲</title>
+  <style>
+    body {
+      font-family: "Microsoft JhengHei", sans-serif;
+      background-color: #fffef5;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 {
+      font-size: 28px;
+    }
+    .idiom-box {
+      font-size: 32px;
+      margin: 20px;
+      color: #333;
+    }
+    .choices button {
+      font-size: 22px;
+      padding: 10px 16px;
+      margin: 8px;
+      border: none;
+      border-radius: 8px;
+      background-color: #d0e6ff;
+      cursor: pointer;
+    }
+    .choices button:hover {
+      background-color: #a8d0f0;
+    }
+    .result {
+      margin-top: 20px;
+      font-size: 20px;
+      min-height: 60px;
+    }
+    .next-btn {
+      margin-top: 20px;
+      font-size: 18px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      background-color: #ffd27d;
+      border: none;
+      cursor: pointer;
+    }
+    .timer {
+      font-size: 18px;
+      color: #666;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>📖 成語選字學習遊戲</h1>
+  <div class="idiom-box" id="idiom"></div>
+  <div class="choices" id="choices"></div>
+  <div class="result" id="result"></div>
+  <div class="timer" id="timer"></div>
+  <button class="next-btn" onclick="manualNext();">🔄 下一題</button>
+
+  <script>
+    const idioms = [
+      { idiom: "狐假__威", correct: "虎", options: ["狗", "虎", "狼"], meaning: "比喻假借別人的威勢來欺壓他人。" },
+      { idiom: "畫蛇添__", correct: "足", options: ["角", "尾", "足"], meaning: "比喻多此一舉，反而壞事。" },
+      { idiom: "對牛彈__", correct: "琴", options: ["鼓", "笛", "琴"], meaning: "對聽不懂道理的人講道理是徒勞的。" },
+      { idiom: "井底之__", correct: "蛙", options: ["雞", "狗", "蛙"], meaning: "比喻見識淺陋的人。" },
+      { idiom: "自相__盾", correct: "矛", options: ["矛", "戟", "劍"], meaning: "比喻言行矛盾。" },
+      { idiom: "指鹿為__", correct: "馬", options: ["羊", "狗", "馬"], meaning: "比喻顛倒是非。" },
+      { idiom: "杯弓__影", correct: "蛇", options: ["鳥", "龍", "蛇"], meaning: "比喻疑神疑鬼。" },
+      { idiom: "草__人命", correct: "菅", options: ["葵", "菅", "芒"], meaning: "比喻視人命如草芥。" },
+      { idiom: "亡羊補__", correct: "牢", options: ["圈", "籠", "牢"], meaning: "事後補救還來得及。" },
+      { idiom: "唇亡__寒", correct: "齒", options: ["舌", "齒", "骨"], meaning: "比喻關係密切，一方受損另一方也難以倖免。" },
+      { idiom: "盲人摸__", correct: "象", options: ["牛", "象", "牆"], meaning: "比喻對事物了解不清，憑局部判斷全貌。" },
+      { idiom: "鷸蚌相__", correct: "爭", options: ["咬", "鬥", "爭"], meaning: "比喻兩方爭鬥，讓第三者得利。" },
+      { idiom: "畫龍點__", correct: "睛", options: ["珠", "睛", "頭"], meaning: "比喻寫作或說話時加上最精彩的部分，使內容更加生動有力。" },
+      { idiom: "愛不__手", correct: "釋", options: ["捨", "放", "釋"], meaning: "非常喜愛，捨不得放下。" },
+      { idiom: "口是__非", correct: "心", options: ["口", "耳", "心"], meaning: "口頭說的與內心想的相反，形容表裡不一。" },
+      { idiom: "雞犬不__", correct: "寧", options: ["靜", "寧", "安"], meaning: "形容十分混亂，連雞狗都不得安寧。" },
+      { idiom: "如魚得__", correct: "水", options: ["風", "水", "泉"], meaning: "比喻得到理想的環境或遇到合適的人。" },
+      { idiom: "夜郎自__", correct: "大", options: ["傲", "大", "高"], meaning: "比喻人見識短淺卻妄自尊大。" },
+      { idiom: "青出於__", correct: "藍", options: ["綠", "藍", "灰"], meaning: "學生勝過老師或後人超越前人。" },
+      { idiom: "塞翁失__", correct: "馬", options: ["牛", "馬", "羊"], meaning: "比喻禍福相倚，壞事中可能有好處。" },
+      { idiom: "畫蛇添__", correct: "足", options: ["足", "手", "尾"], meaning: "比喻做事多餘，不但無益，反而有害。" },
+      { idiom: "刻舟求__", correct: "劍", options: ["魚", "劍", "寶"], meaning: "比喻人拘泥固執，不懂變通。" },
+      { idiom: "掩耳盜__", correct: "鈴", options: ["鐘", "鈴", "鼓"], meaning: "比喻自欺欺人。" },
+      { idiom: "畫餅充__", correct: "飢", options: ["飢", "饑", "渴"], meaning: "比喻以空想安慰自己，無濟於事。" },
+      { idiom: "抱薪救__", correct: "火", options: ["火", "水", "毒"], meaning: "比喻用錯方法處理，反而使問題更嚴重。" },
+      { idiom: "狼心狗__", correct: "肺", options: ["腸", "肺", "肚"], meaning: "形容人心腸狠毒。" },
+      { idiom: "破釜沉__", correct: "舟", options: ["舟", "船", "營"], meaning: "比喻下定決心，不顧一切行動。" },
+      { idiom: "指桑罵__", correct: "槐", options: ["槐", "柳", "花"], meaning: "表面罵一個人，實際指責另一個人。" },
+      { idiom: "愚公移__", correct: "山", options: ["山", "河", "屋"], meaning: "比喻堅持不懈，努力不懈。" },
+      { idiom: "前__之鑑", correct: "車", options: ["人", "事", "車"], meaning: "以以前的失敗作為借鏡。" }
+    ];
+
+    let current = {};
+    let countdown = 0;
+    let timerInterval = null;
+
+    function startCountdown(seconds = 10) {
+      countdown = seconds;
+      updateTimerText();
+
+      clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        countdown--;
+        updateTimerText();
+        if (countdown <= 0) {
+          clearInterval(timerInterval);
+          newGame();
+        }
+      }, 1000);
+    }
+
+    function updateTimerText() {
+      const timerDiv = document.getElementById("timer");
+      timerDiv.innerText = countdown > 0 ? `⏳ ${countdown} 秒後自動進入下一題` : "";
+    }
+
+    function newGame() {
+      const index = Math.floor(Math.random() * idioms.length);
+      current = idioms[index];
+      document.getElementById("idiom").innerText = current.idiom;
+      document.getElementById("result").innerText = "";
+      document.getElementById("choices").innerHTML = "";
+       document.getElementById("timer").innerText = ""; // ✅ 清空倒數文字
+      current.options.forEach(opt => {
+        const btn = document.createElement("button");
+        btn.innerText = opt;
+        btn.onclick = () => checkAnswer(opt);
+        document.getElementById("choices").appendChild(btn);
+      });
+      clearInterval(timerInterval);
+      updateTimerText(); // 清空倒數
+    }
+
+    function checkAnswer(choice) {
+      const resultDiv = document.getElementById("result");
+      if (choice === current.correct) {
+        resultDiv.innerHTML = `✅ 答對了！<br><b>${current.idiom.replace("__", choice)}</b><br>📘 解釋：${current.meaning}`;
+        startCountdown(10); // 正確時開始倒數
+      } else {
+        resultDiv.innerHTML = "❌ 錯誤，請再試一次。";
+      }
+    }
+
+    function manualNext() {
+
+      newGame();
+    }
+
+    newGame();
+  </script>
+</body>
+</html>
